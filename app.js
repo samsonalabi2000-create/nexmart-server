@@ -4,6 +4,7 @@ const helmet    = require("helmet");
 const morgan    = require("morgan");
 const rateLimit = require("express-rate-limit");
 const AppError  = require("./utils/AppError");
+const categoryRoutes = require("./routes/categories");
 
 const app = express();
 
@@ -11,10 +12,23 @@ const app = express();
 app.use(helmet());
 
 // ── CORS ──────────────────────────────────────────────────────────────────────
-app.use(cors({
-  origin: process.env.CLIENT_URL || "http://localhost:5173",
-  credentials: true,
-}));
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:4173",
+  process.env.CLIENT_URL,
+].filter(Boolean);
+
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      callback(new Error("Not allowed by CORS"));
+    },
+    credentials: true,
+  })
+);
 
 // ── Paystack webhook needs raw body BEFORE express.json() ─────────────────────
 // ── Paystack webhook ─────────────────────────────────────────────────────────
@@ -58,6 +72,7 @@ const chatLimiter = rateLimit({
 app.use("/api", globalLimiter);
 app.use("/api/auth", authLimiter);
 app.use("/api/chat", chatLimiter);
+app.use("/api/categories", categoryRoutes);
 
 // ── HTTP logging ──────────────────────────────────────────────────────────────
 if (process.env.NODE_ENV === "development") {
@@ -130,5 +145,6 @@ app.use((err, _req, res, _next) => {
     message,
   });
 });
+
 
 module.exports = app;

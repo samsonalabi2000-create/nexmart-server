@@ -15,12 +15,20 @@ const argon2   = require("argon2");
 
 
 
+const isRenderDatabase =
+  process.env.DB_HOST &&
+  process.env.DB_HOST.includes("render.com");
+
 const pool = new Pool({
-  host:     process.env.DB_HOST     || "localhost",
-  port:     Number(process.env.DB_PORT) || 5432,
-  database: process.env.DB_NAME     || "nexmart",
-  user:     process.env.DB_USER     || "postgres",
+  host: process.env.DB_HOST || "localhost",
+  port: Number(process.env.DB_PORT) || 5432,
+  database: process.env.DB_NAME || "nexmart",
+  user: process.env.DB_USER || "postgres",
   password: process.env.DB_PASSWORD || "",
+  ssl: isRenderDatabase ? { rejectUnauthorized: false } : false,
+  max: 10,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 10000,
 });
 
 // ─── PRODUCTS ─────────────────────────────────────────────────────────────────
@@ -602,9 +610,6 @@ const PRODUCTS = [
       "https://dyson-h.assetsadobe2.com/is/image/content/dam/dyson/products/hair-care/dyson-airwrapid/PDPs/usa-alt-galley/SW1.png?cropPathE=mobile&fit=stretch,1&wid=640",
       "https://dyson-h.assetsadobe2.com/is/image/content/dam/dyson/products/hair-care/dyson-airwrapid/PDPs/usa-alt-galley/US%20ALT%207.png?cropPathE=mobile&fit=stretch,1&wid=640",
       "https://dyson-h.assetsadobe2.com/is/image/content/dam/dyson/products/hair-care/dyson-airwrapid/PDPs/strawberry-bronze-blush-pink/straight-wavy/Gallery/with-copy/308F_Strawberry_Gallery_T1T2_With%20copy_04.jpg?cropPathE=mobile&fit=stretch,1&wid=640",
-    ],
-    videos:        [
-      "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4"
     ],
     badge:         "sale",
     is_new:        false,
@@ -1335,34 +1340,36 @@ async function seed() {
     await client.query("DELETE FROM users");
 
     // 2. Seed products
-    console.log(`📦 Inserting ${PRODUCTS.length} products...`);
-    for (const p of PRODUCTS) {
-      await client.query(
-        `INSERT INTO products
-           (name, description, price, original_price, category, category_name,
-            brand, images, videos, badge, is_new, is_best_seller, stock, specs, tags, rating, review_count)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)`,
-        [
-          p.name,
-          p.description,
-          p.price,
-          p.original_price,
-          p.category,
-          p.category_name,
-          p.brand,
-          p.images,
-          p.videos || [],
-          p.badge,
-          p.is_new,
-          p.is_best_seller,
-          p.stock,
-          JSON.stringify(p.specs),
-          p.tags,
-          p.rating,
-          p.review_count,
-        ]
-      );
-    }
+        console.log(`📦 Inserting ${PRODUCTS.length} products...`);
+
+for (const p of PRODUCTS) {
+  console.log("Inserting:", p.name);
+
+  await client.query(
+    `INSERT INTO products
+      (name, description, price, original_price, category, category_name,
+       brand, images, badge, is_new, is_best_seller, stock, specs, tags, rating, review_count)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)`,
+    [
+      p.name,
+      p.description,
+      p.price,
+      p.original_price,
+      p.category,
+      p.category_name,
+      p.brand,
+      p.images,
+      p.badge,
+      p.is_new,
+      p.is_best_seller,
+      p.stock,
+      JSON.stringify(p.specs),
+      p.tags,
+      p.rating,
+      p.review_count,
+    ]
+  );
+}
 
     // 3. Seed admin user
     console.log("👤 Creating admin user...");
