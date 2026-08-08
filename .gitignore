@@ -1,6 +1,14 @@
-node_modules/
+# Environment variables
 .env
-dist/
-coverage/
-logs/
+.env.*
+!.env.example
+
+# Dependencies
+node_modules/
+
+# Logs
 *.log
+npm-debug.log*
+
+# OS
+.DS_Store
