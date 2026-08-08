@@ -4,8 +4,8 @@
   "description": "NexMart REST API — Express · PostgreSQL · Argon2",
   "main": "server.js",
   "scripts": {
-  "dev": "nodemon --exec \"node --env-file=.env.development server.js\"",
-  "start": "node --env-file=.env.production server.js",
+    "dev": "nodemon --exec \"node --env-file=.env.development server.js\"",
+    "start": "node server.js",
     "db:init": "psql -U postgres -d NexMart-db -f sql/schema.sql",
     "db:seed": "node sql/seed.js"
   },
