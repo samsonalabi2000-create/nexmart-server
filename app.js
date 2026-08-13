@@ -5,6 +5,8 @@ const morgan    = require("morgan");
 const rateLimit = require("express-rate-limit");
 const AppError  = require("./utils/AppError");
 const categoryRoutes = require("./routes/categories");
+const sellerRoutes = require("./routes/seller");
+const adminSellerRoutes = require("./routes/adminSellers");
 
 const app = express();
 
@@ -73,6 +75,8 @@ app.use("/api", globalLimiter);
 app.use("/api/auth", authLimiter);
 app.use("/api/chat", chatLimiter);
 app.use("/api/categories", categoryRoutes);
+app.use("/api/seller", sellerRoutes);
+app.use("/api/admin/sellers", adminSellerRoutes);
 
 // ── HTTP logging ──────────────────────────────────────────────────────────────
 if (process.env.NODE_ENV === "development") {
@@ -87,6 +91,8 @@ app.use("/api/products", require("./routes/products"));
 app.use("/api/orders",   require("./routes/orders"));
 app.use("/api/wishlist", require("./routes/wishlist"));
 app.use("/api/admin",    require("./routes/admin"));
+app.use("/api/categories", require("./routes/categories"));
+      
 
 // IMPORTANT:
 // Your actual file is payment_route.js
