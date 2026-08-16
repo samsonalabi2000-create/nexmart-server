@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "dev": "nodemon --exec \"node --env-file=.env.development server.js\"",
-    "start": "node server.js",
+    "start": "node --env-file=.env.development server.js",
     "db:init": "psql -U postgres -d NexMart-db -f sql/schema.sql",
     "db:seed": "node sql/seed.js"
   },
